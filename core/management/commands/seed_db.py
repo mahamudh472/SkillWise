@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from accounts.models import User 
-from core.models import Category, Course
+from core.models import Category, Course, Module, Lesson
 import faker, random
 fk = faker.Faker()
 
@@ -59,5 +59,22 @@ class Command(BaseCommand):
             )
             course.save()
             self.stdout.write(f'Created course: {course.name}')
+            modules_count = random.randint(4, 9)
+            for i in range(modules_count):
+                module = Module.objects.create(
+                    name=fk.sentence(),
+                    course=course
+                )
+                module.save()
+                self.stdout.write(f"{i}. Module created for {course.name}")
+                lesson_count = random.randint(3, 6)
+                for x in range(lesson_count):
+                    lesson = Lesson.objects.create(
+                        name=fk.sentence(),
+                        content=fk.paragraphs(),
+                        module=module
+                    )
+                    lesson.save()
+                    self.stdout.write(f'{x}.Lesson created for {module.name}')
         except Exception as e:
             raise Exception(f"Error while creating Course - {e}")

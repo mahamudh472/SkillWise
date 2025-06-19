@@ -35,7 +35,7 @@ class Module(models.Model):
 class Lesson(models.Model):
     name = models.CharField()
     content = models.TextField()
-    module = models.ForeignKey(Module, related_name='modules', on_delete=models.CASCADE)
+    module = models.ForeignKey(Module, related_name='lessons', on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
