@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -9,6 +9,20 @@ class User(AbstractUser):
     )
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new:
+            UserProfile.objects.create(user=self, bio='default')
+
+            try:
+                group_name = self.role.capitalize()
+                group = Group.objects.get(name=group_name)
+                self.groups.add(group)
+            except Group.DoesNotExist:
+                print(f"[WARNING] Group '{self.role}' does not exist.")
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
