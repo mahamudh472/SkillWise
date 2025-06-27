@@ -14,7 +14,14 @@ class ModuleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CourseSerializer(serializers.ModelSerializer):
-    modules = ModuleSerializer(many=True, read_only=True)
+    category = serializers.SerializerMethodField()
+    modules_count = serializers.SerializerMethodField()
+    
     class Meta:
         model = Course
-        fields = '__all__'
+        fields = ['author', 'name', 'price', 'category', 'modules_count']
+    
+    def get_modules_count(self, obj):
+        return obj.modules.count()
+    def get_category(self, obj):
+        return obj.category.name
