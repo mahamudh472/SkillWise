@@ -25,3 +25,10 @@ class CourseSerializer(serializers.ModelSerializer):
         return obj.modules.count()
     def get_category(self, obj):
         return obj.category.name
+
+class CourseDetailsSerializer(serializers.ModelSerializer):
+    modules = ModuleSerializer(many=True, read_only=True)
+    class Meta:
+        model = Course
+        fields = "__all__"
+

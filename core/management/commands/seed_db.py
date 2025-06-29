@@ -12,7 +12,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         
         try:
-            self._add_user()
+            self._add_course()
         except Exception as e:
             raise CommandError(f'An error occured {e}')
         
@@ -73,7 +73,8 @@ class Command(BaseCommand):
     
     def _add_course(self):
         try:
-            user = User.objects.order_by('?').first()
+            # user = User.objects.order_by('?').first()
+            user = User.objects.get(username="mahmud")
             cat = Category.objects.order_by('?').first()
             course = Course.objects.create(
                 author=user,
