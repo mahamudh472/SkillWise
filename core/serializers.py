@@ -2,6 +2,11 @@ from rest_framework import serializers
 from .models import (
     Category, Course, Coupon,Enrollment, Invoice, Lesson, Module, Payment, Progress, Review
 )
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['name']
+        
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
