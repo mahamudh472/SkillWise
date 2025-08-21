@@ -37,3 +37,11 @@ class CourseDetailsSerializer(serializers.ModelSerializer):
         model = Course
         fields = "__all__"
 
+
+# Temprory course details serializer
+class TempCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = "__all__"
+
+

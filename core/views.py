@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from rest_framework import generics, views, response, permissions
 from .models import Course, Enrollment
-from .serializers import CourseSerializer, CourseDetailsSerializer
+from .serializers import CourseSerializer, CourseDetailsSerializer, TempCourseSerializer
 from accounts.permissions import IsInstructor
 from rest_framework.exceptions import PermissionDenied, NotFound
+from django.db.models.functions import Upper
 
 class CourseListView(generics.ListCreateAPIView):
     queryset = Course.objects.all()
@@ -30,4 +31,17 @@ class CourseDetailView(views.APIView):
             raise PermissionDenied("You do not have access to this course.")
 
         serializer = CourseDetailsSerializer(course)
+        return response.Response(serializer.data)
+
+class TempCourseAPIView(views.APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+
+        courses = Course.objects.all()
+        serializer = TempCourseSerializer(courses, many=True)
+        from pprint import pprint
+        temp_data = Course.objects.values_list('name', flat=True)
+        pprint(temp_data)
+        
         return response.Response(serializer.data)
