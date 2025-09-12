@@ -25,7 +25,7 @@ class User(AbstractUser):
                 print(f"[WARNING] Group '{self.role}' does not exist.")
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to='avatar/', blank=True, null=True)
     bio = models.TextField()
 
