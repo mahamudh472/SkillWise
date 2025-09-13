@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics, views, response, permissions
+from rest_framework import generics, views, response, permissions, status
 from .models import Course, Enrollment
 from .serializers import CourseSerializer, CourseDetailsSerializer, TempCourseSerializer
 from accounts.permissions import IsInstructor
@@ -25,7 +25,7 @@ class CourseDetailView(views.APIView):
         user = request.user
         if user.role.lower() == 'instructor' and user==course.author:
             pass
-        elif user in Enrollment.objects.filter(student=user, course=course):
+        elif Enrollment.objects.filter(student=user, course=course).exists():
             pass
         else:
             raise PermissionDenied("You do not have access to this course.")
@@ -45,3 +45,31 @@ class TempCourseAPIView(views.APIView):
         pprint(temp_data)
         
         return response.Response(serializer.data)
+
+class PaymentCreateView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def post(self, request):
+        
+        course_id = request.data.get("course_id", None)
+        print(request.data)
+        print(course_id)
+        course = Course.objects.filter(id=course_id)
+        if course.exists():
+            course = course.first()
+            price = course.price
+            Enrollment.objects.create(
+                student=request.user,
+                course=course
+            )
+        else:
+            return response.Response({
+                "Error": "Course not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+        print(course.name, course.price)
+
+        checkout_url = True
+
+        return response.Response({
+            "checkout_url": checkout_url,
+            # "course": course
+        })
