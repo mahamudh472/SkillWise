@@ -1,18 +1,28 @@
 from django.shortcuts import render
-from rest_framework import generics, views, response, permissions, status
-from .models import Course, Enrollment
-from .serializers import CourseSerializer, CourseDetailsSerializer, TempCourseSerializer
+from rest_framework import  status
+from rest_framework.generics import (
+    ListCreateAPIView, RetrieveUpdateDestroyAPIView
+)
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import Course, Enrollment, Module, Lesson
+from .serializers import (
+    CourseSerializer, 
+    CourseDetailsSerializer, 
+    ModuleSerializer, LessonSerializer
+    )
 from accounts.permissions import IsInstructor
 from rest_framework.exceptions import PermissionDenied, NotFound
 from django.db.models.functions import Upper
 
-class CourseListView(generics.ListCreateAPIView):
+class CourseListView(ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
 
-class CourseDetailView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class CourseDetailView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -31,28 +41,40 @@ class CourseDetailView(views.APIView):
             raise PermissionDenied("You do not have access to this course.")
 
         serializer = CourseDetailsSerializer(course)
-        return response.Response(serializer.data)
+        return Response(serializer.data)
 
-class TempCourseAPIView(views.APIView):
-    permission_classes = [permissions.AllowAny]
+class CourseUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+    queryset = Course.objects.all()
+    permission_classes = [IsInstructor]
+    serializer_class = CourseSerializer
 
-    def get(self, request):
+class ModuleListCreateAPIView(ListCreateAPIView):
+    serializer_class = ModuleSerializer
+    permission_classes = [IsAuthenticated]
 
-        courses = Course.objects.all()
-        serializer = TempCourseSerializer(courses, many=True)
-        from pprint import pprint
-        temp_data = Course.objects.values_list('name', flat=True)
-        pprint(temp_data)
-        
-        return response.Response(serializer.data)
+    def get_queryset(self):       
+        return Module.objects.filter(course__id=self.kwargs['course_id']) 
+    
 
-class PaymentCreateView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class ModuleDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        module = Module.objects.filter(pk=pk)
+        if module.exists():
+            module = module.first()
+        else:
+            raise NotFound("Module Not Found")
+        course = module.course
+        if not Enrollment.objects.filter(course=course, student=request.user).exists():
+            raise PermissionDenied("You don't have access to this course.")
+        serializer = ModuleSerializer(module)
+        return Response(serializer.data)
+
+class PaymentCreateView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
-        
         course_id = request.data.get("course_id", None)
-        print(request.data)
-        print(course_id)
         course = Course.objects.filter(id=course_id)
         if course.exists():
             course = course.first()
@@ -62,14 +84,14 @@ class PaymentCreateView(views.APIView):
                 course=course
             )
         else:
-            return response.Response({
+            return Response({
                 "Error": "Course not found"
             }, status=status.HTTP_404_NOT_FOUND)
         print(course.name, course.price)
 
         checkout_url = True
 
-        return response.Response({
+        return Response({
             "checkout_url": checkout_url,
             # "course": course
         })

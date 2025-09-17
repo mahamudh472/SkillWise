@@ -39,16 +39,101 @@ Example Use Cases
 
 Endpoints Overview (Examples)
 -----------------------------
-- /api/v1/auth/register/            -> Signup
-- /api/v1/auth/login/               -> Login
-- /api/v1/courses/                  -> List/Create Courses
-- /api/v1/courses/{id}/             -> Retrieve Course Details
-- /api/v1/enrollments/              -> Enroll in a Course
-- /api/v1/progress/                 -> Track User Progress
-- /api/v1/payments/create/          -> Initiate Payment
-- /api/v1/instructors/dashboard/    -> Instructor Stats
-- /api/v1/reviews/                  -> Post a Course Review
-- /api/v1/admin/analytics/          -> Admin Analytics
+
+## 📌 Authentication & User Management
+
+* `POST /api/v1/auth/register/` → User signup
+* `POST /api/v1/auth/login/` → Obtain JWT token
+* `POST /api/v1/auth/logout/` → Invalidate token
+* `POST /api/v1/auth/refresh/` → Refresh JWT token
+* `POST /api/v1/auth/password-reset/` → Request reset link
+* `POST /api/v1/auth/password-reset/confirm/` → Confirm new password
+* `GET  /api/v1/profile/` → Get own profile
+* `PATCH /api/v1/profile/` → Update own profile
+* `GET  /api/v1/users/{id}/` → (Admin) Get user details
+* `PATCH /api/v1/users/{id}/` → (Admin) Update user
+* `DELETE /api/v1/users/{id}/` → (Admin) Delete user
+
+---
+
+## 📌 Courses & Content
+
+* `GET  /api/v1/courses/` → List all courses (filtering, search, pagination)
+* `POST /api/v1/courses/` → (Instructor/Admin) Create course
+* `GET  /api/v1/courses/{id}/` → Get course details
+* `PATCH /api/v1/courses/{id}/` → (Instructor/Admin) Update course
+* `DELETE /api/v1/courses/{id}/` → (Instructor/Admin) Delete course
+
+**Modules inside a course**
+
+* `POST /api/v1/courses/{course_id}/modules/` → Add module
+* `GET  /api/v1/courses/{course_id}/modules/` → List modules
+* `PATCH /api/v1/modules/{id}/` → Update module
+* `DELETE /api/v1/modules/{id}/` → Delete module
+
+**Lessons inside a module**
+
+* `POST /api/v1/modules/{module_id}/lessons/` → Add lesson
+* `GET  /api/v1/modules/{module_id}/lessons/` → List lessons
+* `GET  /api/v1/lessons/{id}/` → Lesson detail (content, video, attachments)
+* `PATCH /api/v1/lessons/{id}/` → Update lesson
+* `DELETE /api/v1/lessons/{id}/` → Delete lesson
+
+---
+
+## 📌 Enrollment & Progress
+
+* `POST /api/v1/courses/{id}/enroll/` → Enroll in a course (after payment)
+* `GET  /api/v1/enrollments/` → My enrollments
+* `GET  /api/v1/enrollments/{id}/` → Enrollment details (status, started\_at, progress)
+* `PATCH /api/v1/enrollments/{id}/progress/` → Update progress (mark lesson as complete)
+* `GET  /api/v1/progress/{course_id}/` → Track progress per course
+
+---
+
+## 📌 Payments
+
+* `POST /api/v1/payments/create/` → Initiate payment (Stripe/SSLCOMMERZ)
+* `POST /api/v1/payments/webhook/` → Webhook to verify payment
+* `GET  /api/v1/payments/history/` → My payment history
+* `GET  /api/v1/payments/invoices/{id}/` → Download/view invoice
+
+---
+
+## 📌 Reviews & Ratings
+
+* `POST /api/v1/courses/{id}/reviews/` → Add review to course
+* `GET  /api/v1/courses/{id}/reviews/` → List course reviews
+* `PATCH /api/v1/reviews/{id}/` → Update review
+* `DELETE /api/v1/reviews/{id}/` → Delete review
+
+---
+
+## 📌 Instructor Dashboard
+
+* `GET  /api/v1/instructors/dashboard/` → Stats (earnings, enrolled students, active courses)
+* `GET  /api/v1/instructors/courses/` → List courses by instructor
+* `GET  /api/v1/instructors/courses/{id}/students/` → Enrolled students in a course
+* `GET  /api/v1/instructors/earnings/` → Earnings history
+
+---
+
+## 📌 Admin Dashboard
+
+* `GET  /api/v1/admin/analytics/` → Platform-wide stats
+* `GET  /api/v1/admin/courses/` → Manage all courses
+* `GET  /api/v1/admin/users/` → Manage all users
+* `GET  /api/v1/admin/payments/` → Payment logs
+* `GET  /api/v1/admin/reports/` → Reported content/users
+
+---
+
+## 📌 Notifications
+
+* `GET  /api/v1/notifications/` → List my notifications
+* `PATCH /api/v1/notifications/{id}/read/` → Mark as read
+
+---
 
 Payment System
 --------------
