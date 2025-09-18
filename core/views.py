@@ -71,6 +71,30 @@ class ModuleDetailAPIView(APIView):
         serializer = ModuleSerializer(module)
         return Response(serializer.data)
 
+class LessonListCreateAPIView(ListCreateAPIView):   
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):       
+        return Lesson.objects.filter(module__id=self.kwargs['module_id'])
+
+
+class LessonDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        lesson = Lesson.objects.filter(pk=pk)
+        if lesson.exists():
+            lesson = lesson.first()
+        else:
+            raise NotFound("Lesson Not Found")
+        module = lesson.module
+        course = module.course
+        if not Enrollment.objects.filter(course=course, student=request.user).exists():
+            raise PermissionDenied("You don't have access to this course.")
+        serializer = LessonSerializer(lesson)
+        return Response(serializer.data)
+
 class PaymentCreateView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):

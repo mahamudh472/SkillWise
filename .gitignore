@@ -1,2 +1,7 @@
 env
+*.pyc
+__pycache__/
+testing.http
+/*/__pycache__
+core/__pycache__/
 .pyc

@@ -11,9 +11,10 @@ urlpatterns = [
     path('courses/<int:pk>/', views.CourseDetailView.as_view()),
 
     path('courses/<int:course_id>/modules/', views.ModuleListCreateAPIView.as_view()),
-    path('courses/modules/<int:pk>/', views.ModuleDetailAPIView.as_view()),
+    path('modules/<int:pk>/', views.ModuleDetailAPIView.as_view()),
 
-
+    path('modules/<int:module_id>/lessons/', views.LessonListCreateAPIView.as_view()),
+    path('lessons/<int:pk>/', views.LessonDetailAPIView.as_view()),
 
 
 
