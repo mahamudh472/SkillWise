@@ -19,5 +19,7 @@ urlpatterns = [
 
 
     path('payments/create/', views.PaymentCreateView.as_view()),
+    path('payments/success/', lambda request: HttpResponse("Payment Success"), name='payment-success' ),
+    path('payments/cancel/', lambda request: HttpResponse("Payment Cancelled"), name='payment-cancel' ),
 ]
 

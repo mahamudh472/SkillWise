@@ -15,6 +15,10 @@ from .serializers import (
 from accounts.permissions import IsInstructor
 from rest_framework.exceptions import PermissionDenied, NotFound
 from django.db.models.functions import Upper
+import stripe 
+from django.conf import settings
+stripe.api_key = settings.STRIPE_SECRET_KEY
+from django.urls import reverse
 
 class CourseListView(ListCreateAPIView):
     queryset = Course.objects.all()
@@ -100,20 +104,46 @@ class PaymentCreateView(APIView):
     def post(self, request):
         course_id = request.data.get("course_id", None)
         course = Course.objects.filter(id=course_id)
+        print("passed course_id:", course_id)
         if course.exists():
             course = course.first()
+            print("course found:", course.name)
+            if Enrollment.objects.filter(student=request.user, course=course).exists():
+                return Response({
+                    "Error": "You are already enrolled in this course"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            print("course found:", course.name, course.price)
+            course_name = course.name
             price = course.price
-            Enrollment.objects.create(
-                student=request.user,
-                course=course
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        "currency": 'usd',
+                        "product_data": {
+                            "name": course_name,
+                        },
+                        "unit_amount": int(price*100),
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=request.build_absolute_uri(reverse('core:payment-success')),
+                cancel_url=request.build_absolute_uri(reverse('core:payment-cancel')),
+                # metadata={
+                #     "course_id": str(course.id),
+                #     "user_id": str(request.user.id)
+                # }
             )
+            print("Stripe session created:", session.id)
+            
         else:
             return Response({
                 "Error": "Course not found"
             }, status=status.HTTP_404_NOT_FOUND)
         print(course.name, course.price)
 
-        checkout_url = True
+        checkout_url = session.url
 
         return Response({
             "checkout_url": checkout_url,

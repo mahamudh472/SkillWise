@@ -17,11 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
-
+from core.utils import StripeWebhookView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('accounts.urls')),
     path('api/v1/', include('core.urls')),
+    path('webhook/stripe', StripeWebhookView.as_view(), name='stripe-webhook'),
 
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
      # Swagger UI
